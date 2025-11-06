@@ -1,0 +1,55 @@
+PRAC B1 (MONGODB)
+
+use collegeDB
+
+db.students.insertMany([
+  { name: "Siddhi", age: 20, course: "DBMS", marks: 88 },
+  { name: "Aditya", age: 21, course: "AI", marks: 92 },
+  { name: "Shreya", age: 20, course: "DBMS", marks: 75 },
+  { name: "Vaishnavi", age: 22, course: "Cloud", marks: 85 }
+])
+
+1)read
+db.students.find()
+
+2)read selected
+db.students.find({}, { name: 1, course: 1, _id: 0 })
+
+3)filter
+db.students.find({ course: "DBMS" })
+
+4)update
+db.students.updateOne(
+  { name: "Shreya" },
+  { $set: { marks: 80 } }
+)
+
+5)updatemany
+db.students.updateMany(
+  { course: "DBMS" },
+  { $inc: { marks: 5 } }
+)
+
+6)delete
+db.students.deleteOne({ name: "Vaishnavi" })
+
+7)deletemany
+db.students.deleteMany({ marks: { $lt: 80 } })
+
+8)logical operators
+db.students.find({
+  $and: [{ course: "DBMS" }, { marks: { $gt: 80 } }]
+})
+
+
+db.students.find({
+  $or: [{ course: "AI" }, { marks: { $lt: 85 } }]
+})
+
+
+db.students.find({
+  $not: { marks: { $lt: 80 } }
+})
+
+9)sort
+db.students.find().sort({ marks: -1 }).limit(3)
