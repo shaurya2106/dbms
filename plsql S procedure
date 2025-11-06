@@ -1,0 +1,88 @@
+PRAC 5
+
+
+CREATE TABLE Stud_marks (
+    roll INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20),
+    total_marks INT
+);
+
+CREATE TABLE result (
+    roll INT,
+    name VARCHAR(20),
+    class VARCHAR(50)
+);
+
+INSERT INTO Stud_marks(name, total_marks)
+VALUES 
+('Shreya', 1450),
+('Siddhi', 980),
+('Aditya', 860),
+('Aryan', 800);
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    INSERT INTO result(roll, name, class)
+    SELECT
+        roll,
+        name,
+        CASE
+            WHEN total_marks BETWEEN 990 AND 1500 THEN 'Distinction'
+            WHEN total_marks BETWEEN 900 AND 989 THEN 'First Class'
+            WHEN total_marks BETWEEN 825 AND 899 THEN 'Higher Second Class'
+            ELSE 'Fail'
+        END AS class
+    FROM Stud_marks;
+END $$
+
+DELIMITER ;
+
+CALL proc_Grade();
+
+SELECT * FROM result;
+
+
+Or 
+DELIMITER $$
+
+CREATE FUNCTION getGrade(marks INT)
+RETURNS VARCHAR(50)
+DETERMINISTIC
+BEGIN
+    DECLARE category VARCHAR(50);
+
+    IF marks BETWEEN 990 AND 1500 THEN
+        SET category = 'Distinction';
+    ELSEIF marks BETWEEN 900 AND 989 THEN
+        SET category = 'First Class';
+    ELSEIF marks BETWEEN 825 AND 899 THEN
+        SET category = 'Higher Second Class';
+    ELSE
+        SET category = 'Fail';
+    END IF;
+
+    RETURN category;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    INSERT INTO result(roll, name, class)
+    SELECT
+        roll,
+        name,
+        getGrade(total_marks) AS class
+    FROM Stud_marks;
+END $$
+
+DELIMITER ;
+
+CALL proc_Grade();
+
+SELECT * FROM result;
