@@ -1,0 +1,77 @@
+PRAC 4
+
+plsql 4a
+
+CREATE TABLE borrower( Roll_no INT,
+     Name VARCHAR(100),
+     DateOfIssue DATE,
+     NameOfBook VARCHAR(100),
+     Status CHAR(1)
+    ;
+ CREATE TABLE fine(
+     Roll_no INT,
+     Date DATE,
+     Amt DECIMAL(10,2)
+     );
+
+ INSERT INTO Borrower VALUES (1,'Shreyai','2025-10-01','AI','I'),
+     (2,'Siddhi','2025-10-10','Devops','I');
+
+ DELIMITER $$
+
+ CREATE PROCEDURE ReturnBook(
+         IN p_rollno INT,
+         IN p_bookname VARCHAR(100)
+     )
+     BEGIN
+         DECLARE v_dateofissue DATE;
+         DECLARE v_days INT;
+         DECLARE v_fine DECIMAL(10,2) DEFAULT 0;
+         DECLARE v_status CHAR(1);
+         DECLARE exit handler for not found
+             BEGIN
+                 SELECT 'Error: Invalid Roll Number or Book Name.' AS Message;
+             END;
+    
+         -- Fetch book details
+         SELECT DateofIssue, Status
+         INTO v_dateofissue, v_status
+         FROM Borrower
+         WHERE Roll_no = p_rollno AND NameofBook = p_bookname;
+    
+         -- Check if already returned
+         IF v_status = 'R' THEN
+             SELECT 'Error: Book is already returned.' AS Message;
+         ELSE
+             SET v_days = DATEDIFF(CURDATE(), v_dateofissue);
+    
+             -- Fine calculation
+             IF v_days > 30 THEN
+                 SET v_fine = (v_days - 30) * 50 + (15 * 5);
+             ELSEIF v_days BETWEEN 15 AND 30 THEN
+                 SET v_fine = v_days * 5;
+             ELSE
+                 SET v_fine = 0;
+             END IF;
+    
+             -- Update borrower status
+             UPDATE Borrower
+             SET Status = 'R'
+             WHERE Roll_no = p_rollno AND NameofBook = p_bookname;
+    
+             -- Insert fine only if applicable
+             IF v_fine > 0 THEN
+                 INSERT INTO Fine(Roll_no, Date, Amt)
+                 VALUES(p_rollno, CURDATE(), v_fine);
+                 SELECT CONCAT('Book returned successfully. Fine = Rs ', v_fine) AS Message;
+             ELSE
+                 SELECT 'Book returned successfully. No fine applicable.' AS Message;
+             END IF;
+         END IF;
+     END$$
+
+
+
+DELIMITER ;
+
+CALL
