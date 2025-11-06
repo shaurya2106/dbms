@@ -1,0 +1,27 @@
+CREATE DATABASE geometry_db;
+USE geometry_db;
+
+CREATE TABLE areas(
+radius INT,
+area DOUBLE
+);
+
+DELIMITER $$
+
+CREATE PROCEDURE insert_circle_areas()
+BEGIN
+	
+DECLARE r INT DEFAULT 5;
+
+WHILE r<=9 DO
+INSERT INTO areas(radius,area)
+VALUES(r, PI()*r*r);
+SET r=r+1;
+END WHILE;
+END $$
+
+DELIMITER ;
+
+CALL insert_circle_areas();
+
+SELECT * FROM areas;
