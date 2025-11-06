@@ -1,0 +1,34 @@
+PRAC B3(MONGODB)
+
+use CollegeDB2
+
+db.students.insertMany([
+  { name: "Siddhi", age: 20, course: "AI", marks: 90 },
+  { name: "Mihika", age: 19, course: "Devops", marks: 95 },
+  { name: "Shreya", age: 22, course: "AI", marks: 85 },
+  { name: "Radha", age: 18, course: "Bams", marks: 89 }
+])
+
+var mapFunction = function() {
+  emit(this.course, this.marks);
+};
+
+var reduceFunction = function(course, marks) {
+  return Array.avg(marks);
+};
+
+db.students.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "avg_marks_per_course" }
+)
+
+db.avg_marks_per_course.find()
+
+OPTIONAL
+
+var reduceFunctionCount = function(course, marks) {
+  return marks.length;
+};
+db.students.mapReduce(mapFunction, reduceFunctionCount, { out: "student_count" })
+db.student_count.find()
