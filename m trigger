@@ -1,0 +1,69 @@
+-- Drop tables if they exist
+DROP TABLE IF EXISTS Library_Audit;
+DROP TABLE IF EXISTS Library;
+
+-- Create database
+create database trigger;
+use trigger;
+
+-- Create main Library table
+CREATE TABLE Library (
+    book_id INT PRIMARY KEY,
+    book_name VARCHAR(50),
+    author VARCHAR(50),
+    price DECIMAL(10,2)
+);
+
+-- Create audit table
+CREATE TABLE Library_Audit (
+    audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    book_name VARCHAR(50),
+    author VARCHAR(50),
+    price DECIMAL(10,2),
+    operation VARCHAR(10),
+    audit_date DATETIME
+);
+
+-- Create AFTER UPDATE trigger
+DELIMITER $$
+
+CREATE TRIGGER trg_library_update
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit(book_id, book_name, author, price, operation, audit_date)
+    VALUES (OLD.book_id, OLD.book_name, OLD.author, OLD.price, 'UPDATE', NOW());
+END$$
+
+-- Create AFTER DELETE trigger
+CREATE TRIGGER trg_library_delete
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit(book_id, book_name, author, price, operation, audit_date)
+    VALUES (OLD.book_id, OLD.book_name, OLD.author, OLD.price, 'DELETE', NOW());
+END$$
+
+DELIMITER ;
+
+-- Insert sample data
+INSERT INTO Library VALUES
+(101, 'DBMS Concepts', 'Korth', 500),
+(102, 'Operating System', 'Galvin', 600),
+(103, 'Computer Networks', 'Tanenbaum', 550),
+(104, 'Data Structures', 'Lipschutz', 450),
+(105, 'Software Engineering', 'Pressman', 700);
+
+-- Display Library table BEFORE changes
+SELECT * FROM Library;
+
+-- Perform Update and Delete operations
+UPDATE Library SET price = price + 50 WHERE book_id = 101;
+DELETE FROM Library WHERE book_id = 102;
+
+-- Display Library table AFTER changes
+SELECT * FROM Library;
+
+-- Display Audit Table
+SELECT * FROM Library_Audit ORDER BY audit_id;
