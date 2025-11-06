@@ -1,0 +1,43 @@
+PRAC B2(MONGODB)
+
+use collegeDB
+
+db.students.insertMany([
+  { name: "Siddhi", age: 21, course: "AI", marks: 85, city: "Pune" },
+  { name: "Riya", age: 22, course: "ML", marks: 92, city: "Mumbai" },
+  { name: "Aarav", age: 20, course: "AI", marks: 78, city: "Pune" },
+  { name: "Tanvi", age: 21, course: "Web Dev", marks: 88, city: "Nagpur" },
+  { name: "Om", age: 22, course: "ML", marks: 95, city: "Pune" }
+])
+
+1)AGGREGATE
+
+
+db.students.aggregate([
+  { $group: { _id: "$course", avgMarks: { $avg: "$marks" } } }
+])
+
+db.students.aggregate([
+  { $group: { _id: "$city", totalStudents: { $sum: 1 } } }
+])
+
+db.students.aggregate([
+  { $match: { marks: { $gt: 85 } } },
+  { $project: { name: 1, marks: 1, course: 1, _id: 0 } }
+])
+
+db.students.aggregate([
+  { $sort: { marks: -1 } }
+])
+
+2)INDEXING
+
+db.students.createIndex({ course: 1 })
+
+db.students.createIndex({ city: 1, marks: -1 })
+
+db.students.getIndexes()
+
+db.students.find({ course: "AI" }).explain("executionStats")
+
+db.students.dropIndex({ course: 1 })
