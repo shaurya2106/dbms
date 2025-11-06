@@ -1,0 +1,107 @@
+PRAC 3
+
+-- 1. Students table
+CREATE TABLE students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50),
+    age INT
+);
+
+-- 2. Courses table
+CREATE TABLE courses (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(50),
+    teacher VARCHAR(50)
+);
+
+-- 3. Enrollment table (link table)
+CREATE TABLE enrollment (
+    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    course_id INT,
+    grade CHAR(1),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+
+Sample data 
+
+INSERT INTO students (name, age) VALUES
+('Amit', 20), ('Bhavna', 21), ('Chetan', 22), ('Divya', 20);
+
+INSERT INTO courses (course_name, teacher) VALUES
+('Math', 'Mr. Rao'),
+('Physics', 'Dr. Sen'),
+('Chemistry', 'Mrs. Das');
+
+INSERT INTO enrollment (student_id, course_id, grade) VALUES
+(1, 1, 'A'),
+(1, 2, 'B'),
+(2, 1, 'A'),
+(3, 3, 'C'),
+(4, 2, 'B');
+
+
+
+Inner join
+SELECT s.name, c.course_name, e.grade
+FROM students s
+JOIN enrollment e ON s.student_id = e.student_id
+JOIN courses c ON e.course_id = c.course_id;
+
+
+Left Join
+SELECT s.name, c.course_name
+FROM students s
+LEFT JOIN enrollment e ON s.student_id = e.student_id
+LEFT JOIN courses c ON e.course_id = c.course_id;
+
+Right Join
+SELECT s.name, c.course_name
+FROM students s
+RIGHT JOIN enrollment e ON s.student_id = e.student_id
+RIGHT JOIN courses c ON e.course_id = c.course_id;
+
+Cross Join
+SELECT s.name, c.course_name
+FROM students s
+CROSS JOIN courses c;
+
+Self Join
+SELECT a.name AS student1, b.name AS student2, a.age
+FROM students a
+JOIN students b ON a.age = b.age AND a.student_id < b.student_id;
+
+Subquery
+SELECT name
+FROM students
+WHERE student_id IN (
+  SELECT student_id FROM enrollment WHERE course_id = 1
+);
+
+Correlated Subquery
+SELECT s.name,
+ (SELECT COUNT(*) FROM enrollment e WHERE e.student_id = s.student_id) AS total_courses
+FROM students s;
+
+
+
+
+
+View
+CREATE VIEW student_summary AS
+SELECT s.student_id, s.name, COUNT(e.course_id) AS total_courses
+FROM students s
+LEFT JOIN enrollment e ON s.student_id = e.student_id
+GROUP BY s.student_id, s.name;
+
+Select from view
+SELECT * FROM student_summary;
+
+OPTIONAL
+AGGREGATE + HAVING
+SELECT c.teacher, COUNT(e.enrollment_id) AS total_students
+FROM courses c
+JOIN enrollment e ON c.course_id = e.course_id
+GROUP BY c.teacher
+HAVING COUNT(e.enrollment_id) > 1;
