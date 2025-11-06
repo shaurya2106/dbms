@@ -1,0 +1,64 @@
+PRAC 2 
+
+CREATE DATABASE StudentDB;
+USE StudentDB;
+
+
+CREATE TABLE Students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50),
+    dob DATE,
+    gender CHAR(1) CHECK (gender IN ('M', 'F')),
+    email VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Courses (
+    course_id INT PRIMARY KEY,
+    course_name VARCHAR(100) NOT NULL,
+    credits INT CHECK (credits > 0)
+);
+
+
+CREATE TABLE Enrollments (
+    enroll_id INT PRIMARY KEY,
+    student_id INT,
+    course_id INT,
+    enroll_date DATE DEFAULT CURRENT_DATE,
+    grade CHAR(1),
+    FOREIGN KEY (student_id) REFERENCES Students(student_id),
+    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+);
+
+
+CREATE VIEW StudentCourseView AS
+SELECT s.student_id, s.first_name, s.last_name, c.course_name, e.grade
+FROM Students s
+JOIN Enrollments e ON s.student_id = e.student_id
+JOIN Courses c ON e.course_id = c.course_id;
+
+CREATE INDEX idx_student_name ON Students(first_name, last_name);
+
+
+INSERT INTO Students VALUES ('Shreya', 'Gangatirkar', '2004-12-03', 'F', 'shreya@gmail.com');
+INSERT INTO Students VALUES ('Siddhi', 'Deshmukh', '2003-11-20', 'F', 'siddhi@gmail.com');
+
+INSERT INTO Courses VALUES (101, 'Database Systems', 4);
+INSERT INTO Courses VALUES (102, 'Operating Systems', 3);
+
+INSERT INTO Enrollments VALUES (1, 1, 101, '2025-01-10', 'A');
+INSERT INTO Enrollments VALUES (2, 2, 102, '2025-01-11', 'B');
+
+1)SELECT * FROM Students
+WHERE first_name LIKE 'S%';
+
+2)UPDATE Students
+SET email = 'siddhi@college.com'
+WHERE student_id = 1;
+
+3)DELETE FROM Enrollments
+WHERE grade = 'F';
+
+4)SELECT * FROM Students
+ORDER BY dob DESC
+LIMIT 2;
