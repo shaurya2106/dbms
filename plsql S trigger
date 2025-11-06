@@ -1,0 +1,75 @@
+PRAC 7
+
+-- Original Library table
+CREATE TABLE Library (
+    book_id INT PRIMARY KEY,
+    book_name VARCHAR(100),
+    author VARCHAR(50),
+    copies INT
+);
+
+-- Audit table to store old records on UPDATE or DELETE
+CREATE TABLE Library_Audit (
+    audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    book_name VARCHAR(100),
+    author VARCHAR(50),
+    copies INT,
+    action_type VARCHAR(10),  -- 'UPDATE' or 'DELETE'
+    action_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+For update
+
+DELIMITER $$
+
+CREATE TRIGGER trg_library_update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit(book_id, book_name, author, copies, action_type)
+    VALUES (OLD.book_id, OLD.book_name, OLD.author, OLD.copies, 'UPDATE');
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+For delete
+
+DELIMITER $$
+
+CREATE TRIGGER trg_library_delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit(book_id, book_name, author, copies, action_type)
+    VALUES (OLD.book_id, OLD.book_name, OLD.author, OLD.copies, 'DELETE');
+END$$
+
+DELIMITER ;
+
+
+
+For testing trigger
+
+
+-- Insert sample data
+INSERT INTO Library VALUES (1,'Math','Mr. Rao',5);
+INSERT INTO Library VALUES (2,'Physics','Dr. Sen',3);
+
+-- Update a record
+UPDATE Library SET copies = 10 WHERE book_id = 1;
+
+-- Delete a record
+DELETE FROM Library WHERE book_id = 2;
+
+-- Check the audit table
+SELECT * FROM Library_Audit;
